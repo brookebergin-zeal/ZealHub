@@ -15,29 +15,53 @@ function DailyIcon({ active }) {
   )
 }
 
-const NAV_ITEMS = [
-  { id: 'daily', label: 'Daily', Icon: DailyIcon },
-  { id: 'calendar', label: 'Calendar', Icon: CalendarIcon },
-]
-
-export default function BottomNav({ view, setView }) {
+export default function BottomNav({ view, activeProjectId, setView, projects, onSelectProject }) {
   return (
-    <nav className="md:hidden fixed bottom-0 inset-x-0 h-14 bg-white border-t border-gray-100 flex z-40">
-      {NAV_ITEMS.map(({ id, label, Icon }) => {
-        const active = view === id
-        return (
-          <button
-            key={id}
-            onClick={() => setView(id)}
-            className="flex-1 flex flex-col items-center justify-center gap-1"
-          >
-            <Icon active={active} />
-            <span className={`text-xs font-medium ${active ? 'text-indigo-600' : 'text-gray-400'}`}>
-              {label}
-            </span>
-          </button>
-        )
-      })}
+    <nav className="md:hidden fixed bottom-0 inset-x-0 h-14 bg-white border-t border-gray-100 z-40">
+      <div className="flex overflow-x-auto scrollbar-hide h-full">
+
+        {/* Daily */}
+        <button
+          onClick={() => setView('daily')}
+          className="flex flex-col items-center justify-center gap-1 px-5 shrink-0"
+        >
+          <DailyIcon active={view === 'daily'} />
+          <span className={`text-xs font-medium ${view === 'daily' ? 'text-indigo-600' : 'text-gray-400'}`}>Daily</span>
+        </button>
+
+        {/* Calendar */}
+        <button
+          onClick={() => setView('calendar')}
+          className="flex flex-col items-center justify-center gap-1 px-5 shrink-0"
+        >
+          <CalendarIcon active={view === 'calendar'} />
+          <span className={`text-xs font-medium ${view === 'calendar' ? 'text-indigo-600' : 'text-gray-400'}`}>Calendar</span>
+        </button>
+
+        {/* Projects — one tab each, scrollable */}
+        {projects.map((p) => {
+          const active = view === 'project' && activeProjectId === p.id
+          return (
+            <button
+              key={p.id}
+              onClick={() => onSelectProject(p.id)}
+              className="flex flex-col items-center justify-center gap-1 px-4 shrink-0 max-w-[80px]"
+            >
+              <div
+                className="w-2 h-2 rounded-full transition-opacity"
+                style={{ backgroundColor: p.color, opacity: active ? 1 : 0.4 }}
+              />
+              <span
+                className="text-xs font-medium truncate w-full text-center"
+                style={{ color: active ? p.color : '#9ca3af' }}
+              >
+                {p.name || 'Project'}
+              </span>
+            </button>
+          )
+        })}
+
+      </div>
     </nav>
   )
 }

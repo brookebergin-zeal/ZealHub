@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export default function TaskChecklist({ tasks, onAdd, onToggle, onDelete }) {
+export default function TaskChecklist({ tasks, onAdd, onToggle, onDelete, title = 'Tasks', accentColor }) {
   const [input, setInput] = useState('')
 
   function handleSubmit(e) {
@@ -10,11 +10,23 @@ export default function TaskChecklist({ tasks, onAdd, onToggle, onDelete }) {
     setInput('')
   }
 
-  return (
-    <div className="flex flex-col h-full p-4 md:p-5">
-      <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Tasks</h2>
+  const headerColor = accentColor ?? '#9ca3af'
 
-      <form onSubmit={handleSubmit} className="flex gap-2 mb-4">
+  return (
+    <div className="flex flex-col p-4 md:p-5">
+      <div className="flex items-center gap-2 mb-3">
+        {accentColor && (
+          <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: accentColor }} />
+        )}
+        <h2
+          className="text-xs font-semibold uppercase tracking-widest"
+          style={{ color: headerColor }}
+        >
+          {title}
+        </h2>
+      </div>
+
+      <form onSubmit={handleSubmit} className="flex gap-2 mb-3">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -29,9 +41,9 @@ export default function TaskChecklist({ tasks, onAdd, onToggle, onDelete }) {
         </button>
       </form>
 
-      <ul className="flex-1 overflow-y-auto space-y-1">
+      <ul className="space-y-1">
         {tasks.length === 0 && (
-          <li className="text-sm text-gray-400 text-center py-10">No tasks for this day.</li>
+          <li className="text-sm text-gray-400 text-center py-4">No tasks for this day.</li>
         )}
         {tasks.map((task) => (
           <li key={task.id} className="flex items-center gap-2.5 py-1.5 group">
@@ -39,7 +51,8 @@ export default function TaskChecklist({ tasks, onAdd, onToggle, onDelete }) {
               type="checkbox"
               checked={task.status === 'done'}
               onChange={(e) => onToggle(task.id, e.target.checked)}
-              className="w-4 h-4 rounded accent-indigo-600 shrink-0 cursor-pointer"
+              className="w-4 h-4 rounded shrink-0 cursor-pointer"
+              style={{ accentColor: accentColor ?? '#6366f1' }}
             />
             <span
               className={`flex-1 text-sm leading-snug ${

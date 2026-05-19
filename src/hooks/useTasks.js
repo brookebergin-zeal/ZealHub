@@ -52,6 +52,7 @@ export function useTasks() {
       status: 'todo',
       priority: 'medium',
       date: null,
+      projectId: null,
       tags: [],
       ...fields,
       createdAt: now,
