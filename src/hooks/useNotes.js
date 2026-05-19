@@ -1,25 +1,29 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
+import { supabase } from '../lib/supabase'
 
-const STORAGE_KEY = 'zealhub_notes'
+export function useNotes(userId) {
+  const [notes, setNotes] = useState({})
 
-function load() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')
-  } catch {
-    return {}
-  }
-}
-
-export function useNotes() {
-  const [notes, setNotes] = useState(load)
+  useEffect(() => {
+    if (!userId) { setNotes({}); return }
+    supabase
+      .from('notes')
+      .select('date, text')
+      .eq('user_id', userId)
+      .then(({ data }) => {
+        if (data) {
+          const map = {}
+          data.forEach(({ date, text }) => { map[date] = text })
+          setNotes(map)
+        }
+      })
+  }, [userId])
 
   const setNote = useCallback((dateStr, text) => {
-    setNotes((prev) => {
-      const next = { ...prev, [dateStr]: text }
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
-      return next
-    })
-  }, [])
+    if (!userId) return
+    setNotes((prev) => ({ ...prev, [dateStr]: text }))
+    supabase.from('notes').upsert({ user_id: userId, date: dateStr, text })
+  }, [userId])
 
   return { notes, setNote }
 }

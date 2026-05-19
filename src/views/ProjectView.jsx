@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { PALETTE } from '../hooks/useProjects'
 
-export default function ProjectView({ project, onUpdate, onDelete }) {
-  const [memberInput, setMemberInput] = useState('')
+export default function ProjectView({ project, onUpdate, onDelete, onArchive }) {
+  const [memberInput, setMemberInput]         = useState('')
+  const [showColorPicker, setShowColorPicker] = useState(false)
 
   function addMember() {
     const t = memberInput.trim()
@@ -21,13 +23,38 @@ export default function ProjectView({ project, onUpdate, onDelete }) {
 
         {/* Color dot + editable name */}
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: project.color }} />
+          <div className="relative">
+            <button
+              onClick={() => setShowColorPicker((v) => !v)}
+              className="w-5 h-5 rounded-full shrink-0 hover:ring-2 hover:ring-offset-2 hover:ring-gray-300 transition-all focus:outline-none"
+              style={{ backgroundColor: project.color }}
+              title="Change colour"
+            />
+            {showColorPicker && (
+              <>
+                <div className="fixed inset-0 z-[9]" onClick={() => setShowColorPicker(false)} />
+                <div className="absolute top-7 left-0 z-10 bg-white border border-gray-200 rounded-xl shadow-lg p-2 flex gap-1.5 flex-wrap w-max">
+                  {PALETTE.map((hex) => (
+                    <button
+                      key={hex}
+                      onClick={() => { onUpdate(project.id, { color: hex }); setShowColorPicker(false) }}
+                      className={`w-6 h-6 rounded-full transition-transform hover:scale-110 focus:outline-none ${project.color === hex ? 'ring-2 ring-offset-1 ring-gray-400' : ''}`}
+                      style={{ backgroundColor: hex }}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
           <input
             value={project.name}
             onChange={(e) => onUpdate(project.id, { name: e.target.value })}
             placeholder="Project name"
             className="text-2xl font-bold text-gray-900 bg-transparent focus:outline-none border-b-2 border-transparent focus:border-brand-400 transition-colors flex-1 min-w-0"
           />
+          {project.archived && (
+            <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full shrink-0">Archived</span>
+          )}
         </div>
 
         <div className="space-y-6">
@@ -104,8 +131,20 @@ export default function ProjectView({ project, onUpdate, onDelete }) {
 
         </div>
 
-        {/* Delete */}
-        <div className="mt-10 pt-6 border-t border-gray-100">
+        {/* Archive + Delete */}
+        <div className="mt-10 pt-6 border-t border-gray-100 flex items-center gap-6">
+          <button
+            onClick={() => {
+              if (project.archived) {
+                onUpdate(project.id, { archived: false })
+              } else {
+                onArchive(project.id)
+              }
+            }}
+            className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            {project.archived ? 'Unarchive' : 'Archive project'}
+          </button>
           <button
             onClick={() => {
               if (window.confirm(`Delete "${project.name || 'this project'}"? All associated tasks will also be deleted.`)) {

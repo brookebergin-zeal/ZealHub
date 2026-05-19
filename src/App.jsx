@@ -1,9 +1,9 @@
-import { useState } from 'react'
-import { GoogleOAuthProvider, googleLogout } from '@react-oauth/google'
+import { useState, useEffect } from 'react'
 import Sidebar from './components/Sidebar'
 import BottomNav from './components/BottomNav'
 import MainHeader from './components/MainHeader'
 import AddProjectModal from './components/AddProjectModal'
+import SearchModal from './components/SearchModal'
 import DailyView from './views/DailyView'
 import CalendarView from './views/CalendarView'
 import ProjectView from './views/ProjectView'
@@ -14,15 +14,35 @@ import { useAuth } from './hooks/useAuth'
 import { useProjects } from './hooks/useProjects'
 import { addDays, addMonths, toDateString } from './utils/dateUtils'
 
-function MainApp({ onLogout }) {
-  const [view, setView]                     = useState('daily')
-  const [date, setDate]                     = useState(() => new Date())
+function LoadingScreen() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="w-6 h-6 rounded-full border-2 border-brand-400 border-t-transparent animate-spin" />
+    </div>
+  )
+}
+
+function MainApp({ user, onLogout }) {
+  const [view, setView]                       = useState('daily')
+  const [date, setDate]                       = useState(() => new Date())
   const [activeProjectId, setActiveProjectId] = useState(null)
   const [showAddProject, setShowAddProject]   = useState(false)
+  const [showSearch, setShowSearch]           = useState(false)
 
-  const { tasks, addTask, updateTask, deleteTask, copyTasks } = useTasks()
-  const { notes, setNote }                               = useNotes()
-  const { projects, addProject, updateProject, deleteProject } = useProjects()
+  const { tasks, addTask, updateTask, deleteTask, copyTasks, reorderTasks } = useTasks(user.id)
+  const { notes, setNote }                                                   = useNotes(user.id)
+  const { projects, addProject, updateProject, deleteProject }               = useProjects(user.id)
+
+  useEffect(() => {
+    function onKey(e) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        setShowSearch(true)
+      }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [])
 
   function navigateToView(v) {
     setView(v)
@@ -38,6 +58,23 @@ function MainApp({ onLogout }) {
     tasks.filter((t) => t.projectId === id).forEach((t) => deleteTask(t.id))
     deleteProject(id)
     if (activeProjectId === id) navigateToView('daily')
+  }
+
+  function handleArchiveProject(id) {
+    updateProject(id, { archived: true })
+    if (activeProjectId === id) navigateToView('daily')
+  }
+
+  function handleToday() {
+    setDate(new Date())
+    if (view === 'project') navigateToView('daily')
+  }
+
+  function handleSearchNavigate(dateStr) {
+    const [y, m, d] = dateStr.split('-').map(Number)
+    setDate(new Date(y, m - 1, d))
+    navigateToView('daily')
+    setShowSearch(false)
   }
 
   function handlePrev() {
@@ -67,6 +104,7 @@ function MainApp({ onLogout }) {
         activeProjectId={activeProjectId}
         onSelectProject={navigateToProject}
         onAddProject={() => setShowAddProject(true)}
+        onOpenSearch={() => setShowSearch(true)}
       />
 
       <div className="flex flex-col flex-1 min-w-0">
@@ -81,6 +119,7 @@ function MainApp({ onLogout }) {
           date={date}
           onPrev={handlePrev}
           onNext={handleNext}
+          onToday={handleToday}
           projectName={activeProject?.name}
         />
 
@@ -92,10 +131,12 @@ function MainApp({ onLogout }) {
               updateTask={updateTask}
               deleteTask={deleteTask}
               copyTasks={copyTasks}
+              reorderTasks={reorderTasks}
               dateStr={dateStr}
               note={notes[dateStr] ?? ''}
               onNoteChange={(text) => setNote(dateStr, text)}
               projects={projects}
+              userEmail={user.email}
             />
           )}
           {view === 'calendar' && (
@@ -112,6 +153,7 @@ function MainApp({ onLogout }) {
               project={activeProject}
               onUpdate={updateProject}
               onDelete={handleDeleteProject}
+              onArchive={handleArchiveProject}
             />
           )}
         </main>
@@ -133,24 +175,25 @@ function MainApp({ onLogout }) {
         />
       )}
 
+      {showSearch && (
+        <SearchModal
+          tasks={tasks}
+          projects={projects}
+          onNavigate={handleSearchNavigate}
+          onClose={() => setShowSearch(false)}
+        />
+      )}
+
     </div>
   )
 }
 
 export default function App() {
-  const { user, login, logout } = useAuth()
+  const { user, loading, login, logout } = useAuth()
 
-  function handleLogout() {
-    googleLogout()
-    logout()
-  }
+  if (loading) return <LoadingScreen />
 
-  return (
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID ?? ''}>
-      {user
-        ? <MainApp onLogout={handleLogout} />
-        : <WelcomePage onLogin={login} />
-      }
-    </GoogleOAuthProvider>
-  )
+  return user
+    ? <MainApp user={user} onLogout={logout} />
+    : <WelcomePage onLogin={login} />
 }

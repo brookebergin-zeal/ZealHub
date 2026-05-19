@@ -1,6 +1,3 @@
-import { useState } from 'react'
-import { useGoogleLogin } from '@react-oauth/google'
-
 function GoogleIcon() {
   return (
     <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
@@ -12,34 +9,10 @@ function GoogleIcon() {
   )
 }
 
+const notConfigured = !import.meta.env.VITE_SUPABASE_URL ||
+                       import.meta.env.VITE_SUPABASE_URL === 'your_supabase_url_here'
+
 export default function WelcomePage({ onLogin }) {
-  const [loading, setLoading] = useState(false)
-  const [error, setError]     = useState('')
-
-  const notConfigured = !import.meta.env.VITE_GOOGLE_CLIENT_ID ||
-                         import.meta.env.VITE_GOOGLE_CLIENT_ID === 'your_client_id_here'
-
-  const signIn = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      setLoading(true)
-      setError('')
-      try {
-        const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-        })
-        const profile = await res.json()
-        onLogin({ name: profile.name, email: profile.email, picture: profile.picture })
-      } catch {
-        setError('Something went wrong. Please try again.')
-        setLoading(false)
-      }
-    },
-    onError: () => {
-      setError('Login failed. Please try again.')
-      setLoading(false)
-    },
-  })
-
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-white via-brand-50/40 to-brand-100/60 px-6">
 
@@ -56,25 +29,23 @@ export default function WelcomePage({ onLogin }) {
       {/* Sign-in */}
       <div className="flex flex-col items-center gap-3">
         <button
-          onClick={() => signIn()}
-          disabled={loading || notConfigured}
+          onClick={onLogin}
+          disabled={notConfigured}
           className="flex items-center gap-3 px-6 py-3 bg-white border border-gray-200 rounded-xl
                      shadow-sm hover:shadow-md hover:border-gray-300 transition-all
                      text-sm font-medium text-gray-700
                      disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <GoogleIcon />
-          {loading ? 'Signing in…' : 'Log in with Google'}
+          Log in with Google
         </button>
-
-        {error && (
-          <p className="text-xs text-red-500">{error}</p>
-        )}
 
         {notConfigured && (
           <p className="text-xs text-amber-500 max-w-xs text-center leading-relaxed">
-            Add your{' '}
-            <code className="bg-amber-50 border border-amber-200 px-1 rounded">VITE_GOOGLE_CLIENT_ID</code>
+            Add{' '}
+            <code className="bg-amber-50 border border-amber-200 px-1 rounded">VITE_SUPABASE_URL</code>
+            {' '}and{' '}
+            <code className="bg-amber-50 border border-amber-200 px-1 rounded">VITE_SUPABASE_ANON_KEY</code>
             {' '}to{' '}
             <code className="bg-amber-50 border border-amber-200 px-1 rounded">.env.local</code>
             {' '}to enable login.

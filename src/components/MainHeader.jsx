@@ -1,6 +1,6 @@
 import { formatDay, formatMonth } from '../utils/dateUtils'
 
-export default function MainHeader({ view, date, onPrev, onNext, projectName }) {
+export default function MainHeader({ view, date, onPrev, onNext, onToday, projectName }) {
   const isProject = view === 'project'
   const title     = isProject ? (projectName || 'Project') : view === 'daily' ? 'Daily' : 'Calendar'
   const dateLabel = isProject ? null : view === 'daily' ? formatDay(date) : formatMonth(date)
@@ -18,6 +18,13 @@ export default function MainHeader({ view, date, onPrev, onNext, projectName }) 
 
       {!isProject && (
         <div className="ml-auto flex items-center gap-1 shrink-0">
+          <button
+            onClick={onToday}
+            className="px-2 py-1 text-xs font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors"
+          >
+            Today
+          </button>
+          <span className="w-px h-4 bg-gray-200 mx-0.5 shrink-0" />
           <button
             onClick={onPrev}
             aria-label="Previous"

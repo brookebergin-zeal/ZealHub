@@ -1,6 +1,6 @@
 # ZealHub — Claude Code context
 
-Single-user React webapp for Zeal IT Consultants. Built to practice React fundamentals. No backend — all state lives in `localStorage`.
+Single-user React webapp for Zeal IT Consultants. Built to practice React fundamentals. Supabase backend (Postgres + RLS). Deployed on Vercel.
 
 ---
 
@@ -8,7 +8,7 @@ Single-user React webapp for Zeal IT Consultants. Built to practice React fundam
 
 - **React 19** + **Vite 6**
 - **Tailwind CSS v4** — configured via `@tailwindcss/vite` plugin, no `tailwind.config.js`. CSS entry point is `src/index.css` with `@import "tailwindcss"`.
-- **`@react-oauth/google`** — Google OAuth for login. Client ID comes from `VITE_GOOGLE_CLIENT_ID` in `.env.local`.
+- **Supabase** — Postgres database + Auth (Google OAuth). Client lives in `src/lib/supabase.js`. Schema in `supabase/schema.sql`.
 - No routing library — view state is plain `useState` in `App.jsx`.
 - No state management library — all state is lifted to `App.jsx > MainApp` and passed as props.
 
@@ -21,13 +21,14 @@ Single-user React webapp for Zeal IT Consultants. Built to practice React fundam
 All hooks are called at the `MainApp` level and passed down as props. Do not move state into child components or introduce context unless explicitly asked.
 
 ```
-App (auth gate + GoogleOAuthProvider)
+App (auth gate — shows LoadingScreen / WelcomePage / MainApp)
 └── MainApp (all hooks, routing state)
     ├── Sidebar        (desktop nav)
     ├── BottomNav      (mobile nav)
-    ├── MainHeader     (view title + date nav)
+    ├── MainHeader     (view title + date nav + Today button)
     ├── DailyView / CalendarView / ProjectView
-    └── AddProjectModal (conditional)
+    ├── AddProjectModal (conditional)
+    └── SearchModal    (conditional, ⌘K)
 ```
 
 ### Routing
@@ -38,14 +39,25 @@ Three-state system in `MainApp`:
 
 Navigate with `navigateToView(v)` or `navigateToProject(id)` — never set these independently.
 
-### Persistence pattern
+### Data persistence — Supabase
 
-Every hook (`useTasks`, `useNotes`, `useProjects`) uses the same pattern:
-- `useState` initialised from `localStorage` via a lazy initialiser
-- A single `persist(updater)` function that calls `setX` with a functional updater AND writes to `localStorage` inside the same call — they cannot diverge
-- All CRUD goes through `persist`
+Each hook (`useTasks`, `useNotes`, `useProjects`) follows the same pattern:
+- `useState` starts empty (`[]` or `{}`)
+- A `useEffect` on `userId` fetches the user's rows from Supabase on mount
+- All mutations update local state **optimistically first**, then fire a Supabase call fire-and-forget
+- A `useRef` (e.g. `tasksRef`) keeps a current snapshot of state for operations that need to read state outside of a `setState` call (e.g. `reorderTasks`, `addProject` color picker)
 
-Do not add direct `localStorage.setItem` calls outside of these hooks.
+Do **not** add direct `localStorage` calls — data lives in Supabase.
+
+### Auth — Supabase Google OAuth
+
+`useAuth()` returns `{ user, loading, login, logout }`:
+- `user` shape: `{ id: uuid, name: string, email: string, picture: string }`
+- `loading`: true while `getSession()` is resolving on initial load
+- `login()` calls `supabase.auth.signInWithOAuth({ provider: 'google' })` — redirect-based
+- `logout()` calls `supabase.auth.signOut()`
+
+`App` shows `<LoadingScreen />` while `loading`, then `<WelcomePage onLogin={login} />` or `<MainApp user={user} onLogout={logout} />`.
 
 ---
 
@@ -62,10 +74,12 @@ Do not add direct `localStorage.setItem` calls outside of these hooks.
   date: string | null,      // YYYY-MM-DD — which day this appears on
   projectId: string | null, // null = general task
   tags: string[],
+  sortOrder: number,        // for drag-to-reorder; fractional approach (avg of neighbours)
   createdAt: string,        // ISO datetime
   updatedAt: string,
 }
 ```
+DB column names are snake_case (`project_id`, `sort_order`, etc.). `dbToTask()` in `useTasks.js` maps db → app shape.
 
 ### Project
 ```js
@@ -76,20 +90,22 @@ Do not add direct `localStorage.setItem` calls outside of these hooks.
   endDate: string|null, // YYYY-MM-DD
   teamMembers: string[],
   notes: string,
-  color: string,        // hex, auto-assigned from PALETTE in useProjects.js
+  color: string,        // hex, auto-assigned from PALETTE or changed via color picker
+  archived: boolean,
   createdAt: string,
   updatedAt: string,
 }
 ```
+DB column names are snake_case. `dbToProject()` in `useProjects.js` maps db → app shape.
 
 ### Notes
-Stored as a flat object: `{ "YYYY-MM-DD": "note text" }`. Accessed via `notes[dateStr] ?? ''`.
+Stored in Supabase `notes` table as `(user_id, date, text)`. In app state: flat object `{ "YYYY-MM-DD": "note text" }`. Accessed via `notes[dateStr] ?? ''`.
 
 ### User (auth)
 ```js
-{ name: string, email: string, picture: string }
+{ id: string, name: string, email: string, picture: string }
 ```
-Stored in `localStorage` under `zealhub_user`. Reading from `useAuth()` anywhere always reflects the same localStorage value.
+Comes from Supabase session `user_metadata`. Not stored in localStorage.
 
 ---
 
@@ -97,6 +113,9 @@ Stored in `localStorage` under `zealhub_user`. Reading from `useAuth()` anywhere
 
 ### Date strings
 Always use `toDateString(date)` from `src/utils/dateUtils.js` to convert a `Date` to `YYYY-MM-DD`. Never use `date.toISOString().split('T')[0]` directly — timezone handling differs.
+
+### `addMonths` — always sets date to 1st first
+`addMonths` calls `d.setDate(1)` before `d.setMonth(...)`. This prevents month overflow (e.g. Jan 31 + 1 month would otherwise land in March). Do not remove this.
 
 ### Project active-on-day check
 ```js
@@ -112,7 +131,22 @@ deleteProject(id)
 This is handled in `handleDeleteProject` in `MainApp` — do not call `deleteProject` directly from child components.
 
 ### Resize handles (DailyView)
-The left/right and notes/calendar splits use `let latest` inside drag closures to avoid stale closure issues when persisting on mouseup. Do not refactor this to use `useRef` without testing — the current pattern is intentional.
+The left/right and notes/calendar splits use `let latest` inside drag closures to avoid stale closure issues when persisting on mouseup. The split percentages are stored in localStorage (not Supabase — UI preference, not data). Do not refactor the drag closure pattern.
+
+### TaskChecklist keys in DailyView
+All `<TaskChecklist>` instances in `DailyView` carry a `key` that includes `dateStr` (e.g. `key={dateStr}` for the general list, `key={`${project.id}-${dateStr}`}` for project lists). This forces React to remount them on day navigation, clearing any pending typed input. Do not remove these keys.
+
+### copyTasks (useTasks)
+`copyTasks(sourceTasks, targetDate)` batch-creates copies of an array of tasks, assigning each a new `id`, the given `targetDate`, and `status: 'todo'`. Used by DailyView's "copy unfinished tasks from yesterday" banner. The banner only appears for tasks that don't already have a matching title+projectId entry on `targetDate`.
+
+### Task sort_order — fractional indexing
+New tasks get `sort_order = Date.now()` (large integer, always grows). On drag-to-reorder, only the moved task's `sort_order` is updated — to `Math.floor((prevOrder + nextOrder) / 2)`. This means only one Supabase update per reorder. The gap between any two adjacent integers from Date.now() is large enough that bisecting will never run out of precision for any realistic usage.
+
+### CalendarView panelDate
+`CalendarView` manages a local `panelDate` state (the day whose tasks are shown in the right panel). Clicking a day sets `panelDate` but does NOT navigate. Navigation happens via the `Daily →` button in the panel, which calls `onSelectDay(panelDate)`. On mobile (`window.innerWidth < 768`), clicking a day still calls `onSelectDay` directly (no panel is shown on mobile).
+
+### GoogleCalendarEmbed
+`GoogleCalendarEmbed` accepts a `userEmail` prop (not `useAuth()` directly). `DailyView` receives `userEmail` from `MainApp` and passes it down.
 
 ---
 
@@ -126,19 +160,16 @@ The left/right and notes/calendar splits use `let latest` inside drag closures t
 
 ### Design tokens (`src/index.css` `@theme` block)
 
-All brand colours are defined as CSS custom properties in the `@theme` block and exposed as Tailwind utilities (`bg-brand-*`, `text-brand-*`, `border-brand-*`, `ring-brand-*`). To change the brand colour, edit only `src/index.css`:
+All brand colours are defined as CSS custom properties in the `@theme` block and exposed as Tailwind utilities (`bg-brand-*`, `text-brand-*`, `border-brand-*`, `ring-brand-*`). To change the brand colour across the whole app, edit only the token values in `src/index.css`. The current scale:
 
-```css
-@theme {
-  --color-brand-50:  #eef2ff;
-  --color-brand-100: #e0e7ff;
-  --color-brand-300: #c7d2fe;
-  --color-brand-400: #818cf8;
-  --color-brand-600: #6366f1;
-  --color-brand-700: #4f46e5;
-  --font-sans: 'Inter', sans-serif;
-}
-```
+| Token | Value | Role |
+|---|---|---|
+| `brand-50` | `#F5F7F8` | Subtle backgrounds (nav highlights, banners) |
+| `brand-100` | `#E6E7EB` | Hover backgrounds (resize handles) |
+| `brand-300` | `#919AAB` | Muted text / borders |
+| `brand-400` | `#0A76B7` | Focus rings, accent dots |
+| `brand-600` | `#0A76B7` | Primary colour — buttons, logo, selected states |
+| `brand-700` | `#000000` | Hover state on primary buttons |
 
 - Never use `indigo-*` classes — use `brand-*` equivalents.
 - `var(--color-brand-600)` is used in inline styles where Tailwind classes can't reach (e.g. checkbox `accentColor`).
@@ -150,10 +181,11 @@ All brand colours are defined as CSS custom properties in the `@theme` block and
 
 - **No React Router** — intentional, view routing is a learning exercise
 - **No Context API** — props are passed down explicitly; good for learning data flow
-- **No backend** — all data in localStorage; a backend + auth iteration is planned
 - **Google Calendar** — iframe embed only (uses browser session); Calendar API not integrated
-- **Long-term goals** — deferred to a future iteration
-- **Project progress tracking** — deferred
-- **Multi-user** — deferred
+- **Project task completion %** — no progress indicator
+- **Add project on mobile** — Add Project button only on desktop sidebar
+- **Long-term goals** — deferred
+- **Multi-user** — each login is isolated; no data sharing between users
+- **Data migration** — no migration path from the old localStorage version
 
 Do not introduce abstractions or patterns not already present unless the task explicitly requires it.

@@ -1,26 +1,44 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { supabase } from '../lib/supabase'
 
-const STORAGE_KEY = 'zealhub_user'
+function sessionToUser(session) {
+  if (!session?.user) return null
+  const meta = session.user.user_metadata ?? {}
+  return {
+    id:      session.user.id,
+    name:    meta.full_name ?? meta.name ?? session.user.email,
+    email:   session.user.email,
+    picture: meta.avatar_url ?? meta.picture ?? '',
+  }
+}
 
 export function useAuth() {
-  const [user, setUser] = useState(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY)
-      return raw ? JSON.parse(raw) : null
-    } catch {
-      return null
-    }
-  })
+  const [user, setUser]       = useState(null)
+  const [loading, setLoading] = useState(true)
 
-  function login(profile) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(profile))
-    setUser(profile)
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(sessionToUser(session))
+      setLoading(false)
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(sessionToUser(session))
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  function login() {
+    supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin },
+    })
   }
 
   function logout() {
-    localStorage.removeItem(STORAGE_KEY)
-    setUser(null)
+    supabase.auth.signOut()
   }
 
-  return { user, login, logout }
+  return { user, loading, login, logout }
 }

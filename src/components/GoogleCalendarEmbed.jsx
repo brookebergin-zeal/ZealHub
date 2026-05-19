@@ -1,12 +1,8 @@
-import { useAuth } from '../hooks/useAuth'
-
-export default function GoogleCalendarEmbed() {
-  const { user } = useAuth()
-
-  if (!user?.email) return null
+export default function GoogleCalendarEmbed({ userEmail }) {
+  if (!userEmail) return null
 
   const tz  = Intl.DateTimeFormat().resolvedOptions().timeZone
-  const src = `https://calendar.google.com/calendar/embed?src=${encodeURIComponent(user.email)}&ctz=${encodeURIComponent(tz)}`
+  const src = `https://calendar.google.com/calendar/embed?src=${encodeURIComponent(userEmail)}&ctz=${encodeURIComponent(tz)}`
 
   return (
     <iframe

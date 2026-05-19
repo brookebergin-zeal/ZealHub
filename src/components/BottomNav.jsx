@@ -39,7 +39,7 @@ export default function BottomNav({ view, activeProjectId, setView, projects, on
         </button>
 
         {/* Projects — one tab each, scrollable */}
-        {projects.map((p) => {
+        {projects.filter((p) => !p.archived).map((p) => {
           const active = view === 'project' && activeProjectId === p.id
           return (
             <button

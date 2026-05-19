@@ -5,7 +5,7 @@ const DAY_HEADERS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 function getBarsInWeek(projects, week, year, month) {
   return projects
-    .filter((p) => p.startDate)
+    .filter((p) => p.startDate && !p.archived)
     .map((p) => {
       let startCol = -1, endCol = -1
       week.forEach((day, col) => {
@@ -57,7 +57,7 @@ export default function CalendarView({ date, tasks, projects, onSelectDay, onSel
   const panelDateStr     = toDateString(panelDate)
   const panelGeneralTasks = tasks.filter((t) => t.date === panelDateStr && !t.projectId)
   const panelActiveProjects = projects.filter((p) =>
-    p.startDate && p.startDate <= panelDateStr && (!p.endDate || p.endDate >= panelDateStr)
+    !p.archived && p.startDate && p.startDate <= panelDateStr && (!p.endDate || p.endDate >= panelDateStr)
   )
   const hasTasks = panelGeneralTasks.length > 0 || panelActiveProjects.some((p) =>
     tasks.some((t) => t.date === panelDateStr && t.projectId === p.id)

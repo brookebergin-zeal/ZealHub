@@ -39,7 +39,7 @@ function readPct(key, fallback) {
   return v !== null ? Number(v) : fallback
 }
 
-export default function DailyView({ tasks, addTask, updateTask, deleteTask, copyTasks, dateStr, note, onNoteChange, projects }) {
+export default function DailyView({ tasks, addTask, updateTask, deleteTask, copyTasks, reorderTasks, dateStr, note, onNoteChange, projects, userEmail }) {
   const [leftPct, setLeftPct] = useState(() => readPct('zealhub_hsplit', 50))
   const [topPct, setTopPct]   = useState(() => readPct('zealhub_vsplit', 50))
 
@@ -96,8 +96,9 @@ export default function DailyView({ tasks, addTask, updateTask, deleteTask, copy
     copyTasks(unfinishedYesterday, dateStr)
   }
 
-  // Projects whose date range includes today
+  // Projects whose date range includes today (excluding archived)
   const activeProjects = projects.filter((p) => {
+    if (p.archived) return false
     if (!p.startDate || p.startDate > dateStr) return false
     if (p.endDate && p.endDate < dateStr) return false
     return true
@@ -128,25 +129,41 @@ export default function DailyView({ tasks, addTask, updateTask, deleteTask, copy
         )}
 
         <TaskChecklist
+          key={dateStr}
           title="Tasks"
           tasks={generalTasks}
           onAdd={(title) => addTask({ title, date: dateStr })}
           onToggle={(id, done) => updateTask(id, { status: done ? 'done' : 'todo' })}
           onDelete={deleteTask}
+          onEdit={(id, title) => updateTask(id, { title })}
+          onReorder={(from, to) => {
+            const fromGlobal = tasks.findIndex((t) => t.id === generalTasks[from].id)
+            const toGlobal   = tasks.findIndex((t) => t.id === generalTasks[to].id)
+            reorderTasks(fromGlobal, toGlobal)
+          }}
         />
 
-        {activeProjects.map((project) => (
-          <div key={project.id} className="border-t border-gray-100">
-            <TaskChecklist
-              title={project.name || 'Untitled Project'}
-              accentColor={project.color}
-              tasks={tasks.filter((t) => t.projectId === project.id && t.date === dateStr)}
-              onAdd={(title) => addTask({ title, date: dateStr, projectId: project.id })}
-              onToggle={(id, done) => updateTask(id, { status: done ? 'done' : 'todo' })}
-              onDelete={deleteTask}
-            />
-          </div>
-        ))}
+        {activeProjects.map((project) => {
+          const projectTasks = tasks.filter((t) => t.projectId === project.id && t.date === dateStr)
+          return (
+            <div key={`${project.id}-${dateStr}`} className="border-t border-gray-100">
+              <TaskChecklist
+                title={project.name || 'Untitled Project'}
+                accentColor={project.color}
+                tasks={projectTasks}
+                onAdd={(title) => addTask({ title, date: dateStr, projectId: project.id })}
+                onToggle={(id, done) => updateTask(id, { status: done ? 'done' : 'todo' })}
+                onDelete={deleteTask}
+                onEdit={(id, title) => updateTask(id, { title })}
+                onReorder={(from, to) => {
+                  const fromGlobal = tasks.findIndex((t) => t.id === projectTasks[from].id)
+                  const toGlobal   = tasks.findIndex((t) => t.id === projectTasks[to].id)
+                  reorderTasks(fromGlobal, toGlobal)
+                }}
+              />
+            </div>
+          )
+        })}
       </section>
 
       {/* Handle: drag left ↔ right */}
@@ -170,7 +187,7 @@ export default function DailyView({ tasks, addTask, updateTask, deleteTask, copy
           className="h-72 md:h-auto flex-1 md:flex-none md:overflow-hidden"
           style={isDesktop ? { height: `${100 - topPct}%` } : undefined}
         >
-          <GoogleCalendarEmbed />
+          <GoogleCalendarEmbed userEmail={userEmail} />
         </div>
       </section>
 
