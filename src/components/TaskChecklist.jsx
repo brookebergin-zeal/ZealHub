@@ -31,11 +31,11 @@ export default function TaskChecklist({ tasks, onAdd, onToggle, onDelete, title 
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Add a task…"
-          className="flex-1 text-sm px-3 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
+          className="flex-1 text-sm px-3 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-400 bg-white"
         />
         <button
           type="submit"
-          className="px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+          className="px-3 py-1.5 bg-brand-600 text-white text-sm rounded-lg hover:bg-brand-700 transition-colors font-medium"
         >
           Add
         </button>
@@ -52,7 +52,7 @@ export default function TaskChecklist({ tasks, onAdd, onToggle, onDelete, title 
               checked={task.status === 'done'}
               onChange={(e) => onToggle(task.id, e.target.checked)}
               className="w-4 h-4 rounded shrink-0 cursor-pointer"
-              style={{ accentColor: accentColor ?? '#6366f1' }}
+              style={{ accentColor: accentColor ?? 'var(--color-brand-600)' }}
             />
             <span
               className={`flex-1 text-sm leading-snug ${

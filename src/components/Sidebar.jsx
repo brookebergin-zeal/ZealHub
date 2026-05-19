@@ -25,7 +25,7 @@ export default function Sidebar({ view, setView, onLogout, projects, activeProje
     <aside className="hidden md:flex flex-col w-52 shrink-0 border-r border-gray-100 bg-white">
 
       <div className="h-14 flex items-center px-5 border-b border-gray-100 shrink-0">
-        <span className="font-bold text-indigo-600 text-lg tracking-tight">ZealHub</span>
+        <span className="font-bold text-brand-600 text-lg tracking-tight">ZealHub</span>
       </div>
 
       {/* Scrollable nav area */}
@@ -38,7 +38,7 @@ export default function Sidebar({ view, setView, onLogout, projects, activeProje
             onClick={() => setView(id)}
             className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left
               ${view === id
-                ? 'bg-indigo-50 text-indigo-600'
+                ? 'bg-brand-50 text-brand-600'
                 : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'
               }`}
           >
@@ -71,7 +71,7 @@ export default function Sidebar({ view, setView, onLogout, projects, activeProje
         {/* Add Project */}
         <button
           onClick={onAddProject}
-          className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors mt-1"
+          className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:text-brand-600 hover:bg-brand-50 transition-colors mt-1"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path d="M12 5v14M5 12h14" strokeLinecap="round" />

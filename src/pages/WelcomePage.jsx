@@ -41,12 +41,12 @@ export default function WelcomePage({ onLogin }) {
   })
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-white via-indigo-50/40 to-indigo-100/60 px-6">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-white via-brand-50/40 to-brand-100/60 px-6">
 
       {/* Logo + tagline */}
       <div className="text-center mb-12">
         <h1 className="text-6xl md:text-7xl font-bold tracking-tight text-gray-900">
-          Zeal <span className="text-indigo-600">Hub</span>
+          Zeal <span className="text-brand-600">Hub</span>
         </h1>
         <p className="mt-3 text-sm tracking-[0.3em] uppercase text-gray-400">
           love your future

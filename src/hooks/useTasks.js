@@ -90,5 +90,18 @@ export function useTasks() {
     persist((prev) => prev.filter((t) => t.status !== 'done'))
   }, [persist])
 
-  return { tasks, addTask, updateTask, deleteTask, reorderTasks, clearCompleted }
+  const copyTasks = useCallback((sourceTasks, targetDate) => {
+    const now = new Date().toISOString()
+    const copies = sourceTasks.map((t) => ({
+      ...t,
+      id: generateId(),
+      date: targetDate,
+      status: 'todo',
+      createdAt: now,
+      updatedAt: now,
+    }))
+    persist((prev) => [...prev, ...copies])
+  }, [persist])
+
+  return { tasks, addTask, updateTask, deleteTask, reorderTasks, clearCompleted, copyTasks }
 }

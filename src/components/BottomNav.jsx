@@ -1,6 +1,6 @@
 function CalendarIcon({ active }) {
   return (
-    <svg className={`w-5 h-5 ${active ? 'text-indigo-600' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg className={`w-5 h-5 ${active ? 'text-brand-600' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <rect x="3" y="4" width="18" height="18" rx="2" />
       <path d="M16 2v4M8 2v4M3 10h18" />
     </svg>
@@ -9,7 +9,7 @@ function CalendarIcon({ active }) {
 
 function DailyIcon({ active }) {
   return (
-    <svg className={`w-5 h-5 ${active ? 'text-indigo-600' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg className={`w-5 h-5 ${active ? 'text-brand-600' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path d="M9 12h12M9 6h12M9 18h12M5 12h.01M5 6h.01M5 18h.01" strokeLinecap="round" />
     </svg>
   )
@@ -26,7 +26,7 @@ export default function BottomNav({ view, activeProjectId, setView, projects, on
           className="flex flex-col items-center justify-center gap-1 px-5 shrink-0"
         >
           <DailyIcon active={view === 'daily'} />
-          <span className={`text-xs font-medium ${view === 'daily' ? 'text-indigo-600' : 'text-gray-400'}`}>Daily</span>
+          <span className={`text-xs font-medium ${view === 'daily' ? 'text-brand-600' : 'text-gray-400'}`}>Daily</span>
         </button>
 
         {/* Calendar */}
@@ -35,7 +35,7 @@ export default function BottomNav({ view, activeProjectId, setView, projects, on
           className="flex flex-col items-center justify-center gap-1 px-5 shrink-0"
         >
           <CalendarIcon active={view === 'calendar'} />
-          <span className={`text-xs font-medium ${view === 'calendar' ? 'text-indigo-600' : 'text-gray-400'}`}>Calendar</span>
+          <span className={`text-xs font-medium ${view === 'calendar' ? 'text-brand-600' : 'text-gray-400'}`}>Calendar</span>
         </button>
 
         {/* Projects — one tab each, scrollable */}

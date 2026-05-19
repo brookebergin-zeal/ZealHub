@@ -1,5 +1,29 @@
 @import "tailwindcss";
 
+@theme {
+  --color-brand-50:  #F5F7F8; /* light grey  — subtle backgrounds        */
+  --color-brand-100: #E6E7EB; /* medium grey — hover backgrounds          */
+  --color-brand-300: #919AAB; /* dark grey   — muted text / borders       */
+  --color-brand-400: #0A76B7; /* blue        — focus rings, accent dots   */
+  --color-brand-600: #0A76B7; /* blue        — primary buttons, logo text */
+  --color-brand-700: #000000; /* black       — button hover state         */
+
+  /* Full palette reference:
+     #0A76B7  blue
+     #000000  black
+     #F12725  red  (use Tailwind red-* for errors/delete — not a brand token)
+     #F5F7F8  light grey
+     #E6E7EB  medium grey
+     #919AAB  dark grey
+  */
+
+  --font-sans: 'Inter', sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
 .scrollbar-hide {
   scrollbar-width: none;
   -ms-overflow-style: none;

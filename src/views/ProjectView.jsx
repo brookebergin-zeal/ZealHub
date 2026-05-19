@@ -26,7 +26,7 @@ export default function ProjectView({ project, onUpdate, onDelete }) {
             value={project.name}
             onChange={(e) => onUpdate(project.id, { name: e.target.value })}
             placeholder="Project name"
-            className="text-2xl font-bold text-gray-900 bg-transparent focus:outline-none border-b-2 border-transparent focus:border-indigo-400 transition-colors flex-1 min-w-0"
+            className="text-2xl font-bold text-gray-900 bg-transparent focus:outline-none border-b-2 border-transparent focus:border-brand-400 transition-colors flex-1 min-w-0"
           />
         </div>
 
@@ -40,7 +40,7 @@ export default function ProjectView({ project, onUpdate, onDelete }) {
                 type="date"
                 value={project.startDate || ''}
                 onChange={(e) => onUpdate(project.id, { startDate: e.target.value })}
-                className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
               />
             </div>
             <div>
@@ -50,7 +50,7 @@ export default function ProjectView({ project, onUpdate, onDelete }) {
                 value={project.endDate || ''}
                 min={project.startDate || undefined}
                 onChange={(e) => onUpdate(project.id, { endDate: e.target.value || null })}
-                className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
               />
             </div>
           </div>
@@ -64,7 +64,7 @@ export default function ProjectView({ project, onUpdate, onDelete }) {
                 onChange={(e) => setMemberInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addMember() } }}
                 placeholder="Add a team member…"
-                className="flex-1 px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="flex-1 px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
               />
               <button
                 type="button"
@@ -98,7 +98,7 @@ export default function ProjectView({ project, onUpdate, onDelete }) {
               onChange={(e) => onUpdate(project.id, { notes: e.target.value })}
               placeholder="Add project notes…"
               rows={8}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 resize-none"
             />
           </div>
 

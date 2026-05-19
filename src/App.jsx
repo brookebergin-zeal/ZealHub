@@ -20,7 +20,7 @@ function MainApp({ onLogout }) {
   const [activeProjectId, setActiveProjectId] = useState(null)
   const [showAddProject, setShowAddProject]   = useState(false)
 
-  const { tasks, addTask, updateTask, deleteTask }       = useTasks()
+  const { tasks, addTask, updateTask, deleteTask, copyTasks } = useTasks()
   const { notes, setNote }                               = useNotes()
   const { projects, addProject, updateProject, deleteProject } = useProjects()
 
@@ -73,7 +73,7 @@ function MainApp({ onLogout }) {
 
         {/* Mobile top bar */}
         <div className="md:hidden h-12 flex items-center px-4 border-b border-gray-100 shrink-0">
-          <span className="font-bold text-indigo-600 tracking-tight">ZealHub</span>
+          <span className="font-bold text-brand-600 tracking-tight">ZealHub</span>
         </div>
 
         <MainHeader
@@ -91,6 +91,7 @@ function MainApp({ onLogout }) {
               addTask={addTask}
               updateTask={updateTask}
               deleteTask={deleteTask}
+              copyTasks={copyTasks}
               dateStr={dateStr}
               note={notes[dateStr] ?? ''}
               onNoteChange={(text) => setNote(dateStr, text)}

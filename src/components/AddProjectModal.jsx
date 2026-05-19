@@ -58,7 +58,7 @@ export default function AddProjectModal({ onAdd, onClose }) {
               onChange={(e) => { setName(e.target.value); setError('') }}
               placeholder="e.g. Website Redesign"
               autoFocus
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
             />
           </div>
 
@@ -70,7 +70,7 @@ export default function AddProjectModal({ onAdd, onClose }) {
                 type="date"
                 value={startDate}
                 onChange={(e) => { setStartDate(e.target.value); setError('') }}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
               />
             </div>
             <div className="flex-1">
@@ -80,7 +80,7 @@ export default function AddProjectModal({ onAdd, onClose }) {
                 value={endDate}
                 min={startDate || undefined}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
               />
             </div>
           </div>
@@ -94,7 +94,7 @@ export default function AddProjectModal({ onAdd, onClose }) {
                 onChange={(e) => setMemberInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addMember() } }}
                 placeholder="Type a name, press Enter…"
-                className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
               />
               <button
                 type="button"
@@ -107,7 +107,7 @@ export default function AddProjectModal({ onAdd, onClose }) {
             {members.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {members.map((m) => (
-                  <span key={m} className="inline-flex items-center gap-1 bg-indigo-50 text-indigo-700 text-xs px-2.5 py-1 rounded-full">
+                  <span key={m} className="inline-flex items-center gap-1 bg-brand-50 text-brand-700 text-xs px-2.5 py-1 rounded-full">
                     {m}
                     <button type="button" onClick={() => removeMember(m)} className="hover:text-red-500 leading-none">×</button>
                   </span>
@@ -124,7 +124,7 @@ export default function AddProjectModal({ onAdd, onClose }) {
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Any notes about this project…"
               rows={3}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 resize-none"
             />
           </div>
 
@@ -134,7 +134,7 @@ export default function AddProjectModal({ onAdd, onClose }) {
             <button type="button" onClick={onClose} className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
               Cancel
             </button>
-            <button type="submit" className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors">
+            <button type="submit" className="flex-1 px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors">
               Create
             </button>
           </div>
