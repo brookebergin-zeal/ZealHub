@@ -1,8 +1,7 @@
 # ZealHub
+### This app is running! Visit it: https://zeal-hub.vercel.app/
 
 A single-user productivity webapp for Zeal IT Consultants staff. Track daily tasks, take notes, manage projects, and view your Google Calendar — all in one place.
-
-Built as a React fundamentals learning project.
 
 ---
 
@@ -159,14 +158,3 @@ supabase/
 | `notes` | `(user_id, date)` | One note per user per day |
 
 All tables have Row Level Security enabled — users can only read and write their own data.
-
----
-
-## Planned / not yet built
-
-- **Project task completion %** — progress indicator on the project page
-- **Add project on mobile** — the Add Project button is only on the desktop sidebar
-- **Long-term goals view**
-- **Multi-user** — currently each login is isolated; no sharing between users
-- **Google Calendar API** — currently iframe embed only
-- **Data migration from localStorage** — existing data from the old localStorage version cannot be automatically imported
