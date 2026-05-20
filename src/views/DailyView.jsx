@@ -40,8 +40,9 @@ function readPct(key, fallback) {
 }
 
 export default function DailyView({ tasks, addTask, updateTask, deleteTask, copyTasks, reorderTasks, dateStr, note, onNoteChange, projects, userEmail }) {
-  const [leftPct, setLeftPct] = useState(() => readPct('zealhub_hsplit', 50))
-  const [topPct, setTopPct]   = useState(() => readPct('zealhub_vsplit', 50))
+  const [leftPct, setLeftPct]         = useState(() => readPct('zealhub_hsplit', 50))
+  const [topPct, setTopPct]           = useState(() => readPct('zealhub_vsplit', 50))
+  const [dismissedDate, setDismissedDate] = useState(null)
 
   const isDesktop = useIsDesktop()
   const rowRef    = useRef(null)
@@ -120,17 +121,25 @@ export default function DailyView({ tasks, addTask, updateTask, deleteTask, copy
         className="border-b md:border-b-0 md:overflow-y-auto"
         style={isDesktop ? { width: `${leftPct}%` } : undefined}
       >
-        {unfinishedYesterday.length > 0 && (
+        {unfinishedYesterday.length > 0 && dismissedDate !== dateStr && (
           <div className="mx-4 mt-3 flex items-center justify-between gap-2 px-3 py-2 bg-brand-50 rounded-lg border border-brand-100">
             <span className="text-xs text-brand-600">
               {unfinishedYesterday.length} unfinished task{unfinishedYesterday.length !== 1 ? 's' : ''} from yesterday
             </span>
-            <button
-              onClick={handleCopyUnfinished}
-              className="text-xs font-semibold text-brand-600 hover:text-brand-700 shrink-0 transition-colors"
-            >
-              Copy over
-            </button>
+            <div className="flex items-center gap-3 shrink-0">
+              <button
+                onClick={handleCopyUnfinished}
+                className="text-xs font-semibold text-brand-600 hover:text-brand-700 transition-colors"
+              >
+                Copy over
+              </button>
+              <button
+                onClick={() => setDismissedDate(dateStr)}
+                className="text-xs text-brand-300 hover:text-brand-600 transition-colors"
+              >
+                ✕
+              </button>
+            </div>
           </div>
         )}
 
