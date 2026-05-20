@@ -1,3 +1,5 @@
+import { useState, useEffect } from 'react'
+
 function GoogleIcon() {
   return (
     <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
@@ -12,18 +14,47 @@ function GoogleIcon() {
 const notConfigured = !import.meta.env.VITE_SUPABASE_URL ||
                        import.meta.env.VITE_SUPABASE_URL === 'your_supabase_url_here'
 
-export default function WelcomePage({ onLogin }) {
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-white via-brand-50/40 to-brand-100/60 px-6">
+const SLOGANS = ['love your future', 'engineer success', 'for yourself, not by yourself', 'lead with kindness']
 
+export default function WelcomePage({ onLogin }) {
+  const [state, setState] = useState({ current: 0, prev: null })
+
+  useEffect(() => {
+    let timeoutId = null
+    const id = setInterval(() => {
+      setState(s => ({ current: (s.current + 1) % SLOGANS.length, prev: s.current }))
+      timeoutId = setTimeout(() => {
+        setState(s => ({ ...s, prev: null }))
+      }, 500)
+    }, 3500)
+    return () => {
+      clearInterval(id)
+      clearTimeout(timeoutId)
+    }
+  }, [])
+
+
+  return (
+    <>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-white via-brand-50/40 to-brand-100/60 px-6">
+      <video className='videoTag' autoPlay loop muted style={{ position: 'absolute', opacity: 0.5, width: '100%', height: '100vh', objectFit: 'cover', zIndex: -1 }}>
+        <source src={"/boat.mp4"} type='video/mp4' />
+      </video>
       {/* Logo + tagline */}
       <div className="text-center mb-12">
-        <h1 className="text-6xl md:text-7xl font-bold tracking-tight text-gray-900">
+        <h1 className="text-6xl md:text-7xl font-bold tracking-tight text-brand-700">
           Zeal <span className="text-brand-600">Hub</span>
         </h1>
-        <p className="mt-3 text-sm tracking-[0.3em] uppercase text-gray-400">
-          love your future
-        </p>
+        <div className="relative mt-3" style={{ height: '1.25rem' }}>
+          {state.prev !== null && (
+            <p key={`out-${state.prev}`} className="slogan-exit absolute inset-x-0 text-center text-sm tracking-[0.3em] uppercase text-brand-300">
+              {SLOGANS[state.prev]}
+            </p>
+          )}
+          <p key={`in-${state.current}`} className="slogan-enter absolute inset-x-0 text-center text-sm tracking-[0.3em] uppercase text-brand-300">
+            {SLOGANS[state.current]}
+          </p>
+        </div>
       </div>
 
       {/* Sign-in */}
@@ -52,7 +83,37 @@ export default function WelcomePage({ onLogin }) {
           </p>
         )}
       </div>
+      </div>
+      <div className="min-h-[50vh] flex flex-col md:flex-row items-center justify-center gap-8 px-6 py-12">
+        <div className="w-72 rounded-xl overflow-hidden shadow-sm bg-white border border-gray-200
+                     hover:shadow-md hover:border-gray-300 transition-all
+                     text-sm">
+          <img className="w-full h-44 object-cover" src="/sticky-notes.jpg" alt="Sticky notes"/>
+          <div className="px-6 py-4">
+            <div className="font-bold text-xl mb-2 text-center">Organize your tasks</div>
+          </div>
+        </div>
+        <div className="w-72 rounded-xl overflow-hidden shadow-sm bg-white border border-gray-200
+                            hover:shadow-md hover:border-gray-300 transition-all
+                            text-sm">
+          <img className="w-full h-44 object-cover object-top" src="/calendar.jpg" alt="A laptop with a calendar"/>
+          <div className="px-6 py-4">
+            <div className="font-bold text-xl mb-2 text-center">View your calendar</div>
+          </div>
+        </div>
+        <div className="w-72 rounded-xl overflow-hidden shadow-sm bg-white border border-gray-200
+                            hover:shadow-md hover:border-gray-300 transition-all
+                            text-sm">
+          <img className="w-full h-44 object-cover" src="/laptop.jpg" alt="Hands working on laptop"/>
+          <div className="px-6 py-4">
+            <div className="font-bold text-xl mb-2 text-center">Achieve your goals</div>
+          </div>
+        </div>
+      </div>
 
+    <div className="min-h-[20vh] bg-brand-400 px-6">
     </div>
+    
+  </>
   )
 }

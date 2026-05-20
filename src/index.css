@@ -31,3 +31,14 @@ body {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+@keyframes sloganEnter {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes sloganExit {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-12px); }
+}
+.slogan-enter { animation: sloganEnter 0.5s ease forwards; }
+.slogan-exit  { animation: sloganExit  0.5s ease forwards; }
