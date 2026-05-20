@@ -4,11 +4,11 @@ import Notes from '../components/Notes'
 import GoogleCalendarEmbed from '../components/GoogleCalendarEmbed'
 import { toDateString } from '../utils/dateUtils'
 
-function ResizeHandle({ direction, onMouseDown }) {
+function ResizeHandle({ direction, onPointerDown }) {
   const isCol = direction === 'col'
   return (
     <div
-      onMouseDown={onMouseDown}
+      onPointerDown={onPointerDown}
       className={`hidden md:flex items-center justify-center shrink-0 group
         bg-gray-100 hover:bg-brand-100 transition-colors
         ${isCol ? 'w-2 cursor-col-resize' : 'h-2 cursor-row-resize'}`}
@@ -49,6 +49,7 @@ export default function DailyView({ tasks, addTask, updateTask, deleteTask, copy
 
   function startHDrag(e) {
     e.preventDefault()
+    e.currentTarget.setPointerCapture(e.pointerId)
     const rect = rowRef.current.getBoundingClientRect()
     let latest = leftPct
     function onMove(e) {
@@ -58,17 +59,18 @@ export default function DailyView({ tasks, addTask, updateTask, deleteTask, copy
     }
     function onUp() {
       localStorage.setItem('zealhub_hsplit', String(latest))
-      document.removeEventListener('mousemove', onMove)
-      document.removeEventListener('mouseup', onUp)
+      document.removeEventListener('pointermove', onMove)
+      document.removeEventListener('pointerup', onUp)
       document.body.style.userSelect = ''
     }
     document.body.style.userSelect = 'none'
-    document.addEventListener('mousemove', onMove)
-    document.addEventListener('mouseup', onUp)
+    document.addEventListener('pointermove', onMove)
+    document.addEventListener('pointerup', onUp)
   }
 
   function startVDrag(e) {
     e.preventDefault()
+    e.currentTarget.setPointerCapture(e.pointerId)
     const rect = rightRef.current.getBoundingClientRect()
     let latest = topPct
     function onMove(e) {
@@ -78,13 +80,13 @@ export default function DailyView({ tasks, addTask, updateTask, deleteTask, copy
     }
     function onUp() {
       localStorage.setItem('zealhub_vsplit', String(latest))
-      document.removeEventListener('mousemove', onMove)
-      document.removeEventListener('mouseup', onUp)
+      document.removeEventListener('pointermove', onMove)
+      document.removeEventListener('pointerup', onUp)
       document.body.style.userSelect = ''
     }
     document.body.style.userSelect = 'none'
-    document.addEventListener('mousemove', onMove)
-    document.addEventListener('mouseup', onUp)
+    document.addEventListener('pointermove', onMove)
+    document.addEventListener('pointerup', onUp)
   }
 
   const [yr, mo, dy] = dateStr.split('-').map(Number)
@@ -171,7 +173,7 @@ export default function DailyView({ tasks, addTask, updateTask, deleteTask, copy
       </section>
 
       {/* Handle: drag left ↔ right */}
-      <ResizeHandle direction="col" onMouseDown={startHDrag} />
+      <ResizeHandle direction="col" onPointerDown={startHDrag} />
 
       {/* Right: notes + calendar */}
       <section
@@ -185,7 +187,7 @@ export default function DailyView({ tasks, addTask, updateTask, deleteTask, copy
           <Notes value={note} onChange={onNoteChange} />
         </div>
 
-        <ResizeHandle direction="row" onMouseDown={startVDrag} />
+        <ResizeHandle direction="row" onPointerDown={startVDrag} />
 
         <div
           className="h-72 md:h-auto flex-1 md:flex-none md:overflow-hidden"
