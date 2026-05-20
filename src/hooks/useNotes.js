@@ -22,7 +22,7 @@ export function useNotes(userId) {
   const setNote = useCallback((dateStr, text) => {
     if (!userId) return
     setNotes((prev) => ({ ...prev, [dateStr]: text }))
-    supabase.from('notes').upsert({ user_id: userId, date: dateStr, text })
+    supabase.from('notes').upsert({ user_id: userId, date: dateStr, text }).then(() => {})
   }, [userId])
 
   return { notes, setNote }

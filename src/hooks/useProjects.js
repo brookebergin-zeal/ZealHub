@@ -69,7 +69,7 @@ export function useProjects(userId) {
       archived:     newProject.archived,
       created_at:   now,
       updated_at:   now,
-    })
+    }).then(() => {})
     return id
   }, [userId])
 
@@ -87,13 +87,13 @@ export function useProjects(userId) {
     if ('notes'       in changes) db.notes        = changes.notes
     if ('color'       in changes) db.color        = changes.color
     if ('archived'    in changes) db.archived     = changes.archived
-    supabase.from('projects').update(db).eq('id', id).eq('user_id', userId)
+    supabase.from('projects').update(db).eq('id', id).eq('user_id', userId).then(() => {})
   }, [userId])
 
   const deleteProject = useCallback((id) => {
     if (!userId) return
     setProjects((prev) => prev.filter((p) => p.id !== id))
-    supabase.from('projects').delete().eq('id', id).eq('user_id', userId)
+    supabase.from('projects').delete().eq('id', id).eq('user_id', userId).then(() => {})
   }, [userId])
 
   return { projects, addProject, updateProject, deleteProject }

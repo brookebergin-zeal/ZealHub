@@ -71,7 +71,7 @@ export function useTasks(userId) {
       sort_order:  task.sortOrder,
       created_at:  task.createdAt,
       updated_at:  task.updatedAt,
-    })
+    }).then(() => {})
     return task
   }, [userId])
 
@@ -89,13 +89,13 @@ export function useTasks(userId) {
     if ('date'        in changes) db.date        = changes.date
     if ('projectId'   in changes) db.project_id  = changes.projectId
     if ('tags'        in changes) db.tags        = changes.tags
-    supabase.from('tasks').update(db).eq('id', id).eq('user_id', userId)
+    supabase.from('tasks').update(db).eq('id', id).eq('user_id', userId).then(() => {})
   }, [userId])
 
   const deleteTask = useCallback((id) => {
     if (!userId) return
     setTasks((prev) => prev.filter((t) => t.id !== id))
-    supabase.from('tasks').delete().eq('id', id).eq('user_id', userId)
+    supabase.from('tasks').delete().eq('id', id).eq('user_id', userId).then(() => {})
   }, [userId])
 
   const reorderTasks = useCallback((fromIndex, toIndex) => {
@@ -114,7 +114,7 @@ export function useTasks(userId) {
 
     const updated = next.map((t, i) => i === toIndex ? { ...t, sortOrder: newOrder } : t)
     setTasks(updated)
-    supabase.from('tasks').update({ sort_order: newOrder }).eq('id', moved.id).eq('user_id', userId)
+    supabase.from('tasks').update({ sort_order: newOrder }).eq('id', moved.id).eq('user_id', userId).then(() => {})
   }, [userId])
 
   const clearCompleted = useCallback(() => {
@@ -154,7 +154,7 @@ export function useTasks(userId) {
       sort_order:  t.sortOrder,
       created_at:  t.createdAt,
       updated_at:  t.updatedAt,
-    })))
+    }))).then(() => {})
   }, [userId])
 
   return { tasks, addTask, updateTask, deleteTask, reorderTasks, clearCompleted, copyTasks }
