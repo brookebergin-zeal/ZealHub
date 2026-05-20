@@ -60,7 +60,9 @@ export default function DailyView({ tasks, addTask, updateTask, deleteTask, copy
       localStorage.setItem('zealhub_hsplit', String(latest))
       document.removeEventListener('mousemove', onMove)
       document.removeEventListener('mouseup', onUp)
+      document.body.style.userSelect = ''
     }
+    document.body.style.userSelect = 'none'
     document.addEventListener('mousemove', onMove)
     document.addEventListener('mouseup', onUp)
   }
@@ -78,7 +80,9 @@ export default function DailyView({ tasks, addTask, updateTask, deleteTask, copy
       localStorage.setItem('zealhub_vsplit', String(latest))
       document.removeEventListener('mousemove', onMove)
       document.removeEventListener('mouseup', onUp)
+      document.body.style.userSelect = ''
     }
+    document.body.style.userSelect = 'none'
     document.addEventListener('mousemove', onMove)
     document.addEventListener('mouseup', onUp)
   }
