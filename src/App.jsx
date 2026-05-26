@@ -13,6 +13,8 @@ import { useNotes } from './hooks/useNotes'
 import { useAuth } from './hooks/useAuth'
 import { useProjects } from './hooks/useProjects'
 import { addDays, addMonths, toDateString } from './utils/dateUtils'
+import { GoogleOAuthProvider } from '@react-oauth/google'
+import { useGoogleCalendar } from './hooks/useGoogleCalendar'
 
 function LoadingScreen() {
   return (
@@ -32,6 +34,7 @@ function MainApp({ user, onLogout }) {
   const { tasks, addTask, updateTask, deleteTask, copyTasks, reorderTasks } = useTasks(user.id)
   const { notes, setNote }                                                   = useNotes(user.id)
   const { projects, addProject, updateProject, deleteProject }               = useProjects(user.id)
+  const { events: calendarEvents, isConnected: isCalendarConnected, isLoading: isCalendarLoading, connectCalendar, disconnectCalendar } = useGoogleCalendar({ userId: user.id, date })
 
   useEffect(() => {
     function onKey(e) {
@@ -146,6 +149,11 @@ function MainApp({ user, onLogout }) {
               projects={projects}
               onSelectDay={handleSelectDay}
               onSelectProject={navigateToProject}
+              calendarEvents={calendarEvents}
+              isCalendarConnected={isCalendarConnected}
+              isCalendarLoading={isCalendarLoading}
+              connectCalendar={connectCalendar}
+              disconnectCalendar={disconnectCalendar}
             />
           )}
           {view === 'project' && activeProject && (
@@ -193,7 +201,12 @@ export default function App() {
 
   if (loading) return <LoadingScreen />
 
-  return user
-    ? <MainApp user={user} onLogout={logout} />
-    : <WelcomePage onLogin={login} />
+  return (
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID ?? ''}>
+      {user
+        ? <MainApp user={user} onLogout={logout} />
+        : <WelcomePage onLogin={login} />
+      }
+    </GoogleOAuthProvider>
+  )
 }
