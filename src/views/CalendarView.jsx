@@ -276,6 +276,14 @@ export default function CalendarView({
                     </button>
                   ))
                 })()}
+                {isCalendarConnected && (
+                  <button
+                    onClick={disconnectCalendar}
+                    className="mt-2 text-xs text-brand-300 hover:text-red-500 transition-colors"
+                  >
+                    Disconnect calendar
+                  </button>
+                )}
               </div>
             ) : (
               <div className="space-y-5">

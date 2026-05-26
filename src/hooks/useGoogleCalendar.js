@@ -53,6 +53,13 @@ export function useGoogleCalendar({ userId, date }) {
     })
       .then(r => r.json())
       .then(data => {
+        if (data.error?.code === 401) {
+          // Token was revoked externally — clear connection and show banner
+          supabase.from('user_calendars').delete().eq('id', calendarAccount.id).then(() => {})
+          setCalendarAccount(null)
+          setEvents([])
+          return
+        }
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
         const normalized = (data.items || []).map(item => ({
           id:           item.id,

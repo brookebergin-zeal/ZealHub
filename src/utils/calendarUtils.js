@@ -23,6 +23,11 @@ export function formatEventTimeRange(startISO, endISO, timezone) {
 }
 
 export function getEventDateStr(isoString, timezone) {
+  if (!isoString) return ''
+  // All-day events from Google Calendar API are date-only strings (YYYY-MM-DD)
+  // Parsing "2026-05-26" with new Date() gives UTC midnight, which shifts the date
+  // in negative-offset timezones. Parse directly instead.
+  if (/^\d{4}-\d{2}-\d{2}$/.test(isoString)) return isoString
   const parts = new Intl.DateTimeFormat('en-US', {
     year:  'numeric',
     month: '2-digit',

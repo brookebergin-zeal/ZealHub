@@ -44,17 +44,17 @@ export function EventDetailModal({ event, timezone, onClose }) {
           <p className="text-sm text-brand-300 mb-3">📍 {event.location}</p>
         )}
 
-        {event.attendees.length > 0 && (
+        {(event.attendees ?? []).length > 0 && (
           <div className="mb-3">
             <p className="text-xs font-medium text-brand-300 uppercase tracking-wide mb-1">
               Participants
             </p>
-            {event.attendees.slice(0, 5).map(a => (
+            {(event.attendees ?? []).slice(0, 5).map(a => (
               <p key={a.email} className="text-sm">
                 {a.name} · <span className="text-brand-300">{a.email}</span>
               </p>
             ))}
-            {event.attendees.length > 5 && (
+            {(event.attendees ?? []).length > 5 && (
               <p className="text-xs text-brand-300">+{event.attendees.length - 5} more</p>
             )}
           </div>
